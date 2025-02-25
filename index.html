@@ -53,7 +53,7 @@
     </div>
 
     <script>
-        emailjs.init('O78MKMMVfvat57KF5');
+        emailjs.init('E_jV5FTI4JisVwIlW');
 
         document.getElementById('emailForm').addEventListener('submit', function(e) {
             e.preventDefault();
@@ -90,7 +90,7 @@
                     transaction_id: `CB${Date.now()}${Math.floor(Math.random() * 1000)}`
                 };
 
-                emailjs.send('service_qwk48fy', 'template_cizpv7g', templateParams)
+                emailjs.send('service_8kzc798', 'template_woxom1z', templateParams)
                     .then(() => {
                         successCount++;
                         statusElement.innerHTML += `<br>✔️ Enviado a: ${recipients[index]}`;
