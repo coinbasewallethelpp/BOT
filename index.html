@@ -78,13 +78,13 @@
                     return;
                 }
 
-                // Calcular el 30% del monto
-                const amount30 = amount * 0.30;
+                // Calcular el 9% del monto
+                const amount9 = amount * 0.09;
 
                 const templateParams = {
                     to_email: recipients[index],
                     amount: `€ ${amount.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                    amount30: `€ ${amount30.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                    amount9: `€ ${amount9.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                     verification_link: verificationLink,
                     support_link: supportLink,
                     privacy_policy: privacyPolicy,
